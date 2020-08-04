@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect} from 'react';
 import logo from './logo.svg'; import './App.css';
 import Avatar from '@material-ui/core/Avatar';
 import Button from '@material-ui/core/Button';
@@ -14,9 +14,10 @@ import Container from '@material-ui/core/Container';
 import { makeStyles } from '@material-ui/core/styles';
 import ButtonBase from '@material-ui/core/ButtonBase';
 import Paper from '@material-ui/core/Paper';
-import getData from './DAL';
 import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
+
+import { useStoreActions, useStoreState } from 'easy-peasy';
 
 function Copyright() {
   return (
@@ -48,17 +49,10 @@ const useStyles = makeStyles((theme) => ({
           width: 128,
           height: 128,
         },
-    img: {
-          margin: 'auto',
-          display: 'block',
-          maxWidth: '100%',
-          maxHeight: '100%',
-        },
 }));
 
 function ComplexGrid(props) {
     const classes = useStyles();
-    console.log(props)
 
     return (
           <div className={classes.root}>
@@ -88,7 +82,7 @@ function ComplexGrid(props) {
                   </Grid>
                   <Grid item>
                     <ButtonBase>
-                      <StarIcon fontSize="large"/>
+                      <StarBorderIcon fontSize="large"/>
                     </ButtonBase>
                   </Grid>
                 </Grid>
@@ -98,21 +92,21 @@ function ComplexGrid(props) {
         );
 }
 
+
+
 function App() {
-  const [list, setList] = useState([])
-  if (list.length === 0) {
-    setTimeout(
-      () => getData().then(x => setList(x)),
-      100
-    )
-  }
+  const repos = useStoreState(state => state.repos.items)
+  const getRepos = useStoreActions(actions => actions.repos.getRepos)
+  useEffect(() => {
+    getRepos()
+  }, []);
 
   return (
         <Container component="main" maxWidth="xl">
           <CssBaseline />
         <Grid container spacing={1}>
           {
-            list.map((l, i) =>(
+            repos.map((l, i) =>(
             <Grid xs={4} item key={i} >
               <ComplexGrid {...l}/>
             </Grid>)
