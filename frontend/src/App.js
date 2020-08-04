@@ -93,13 +93,28 @@ function ComplexGrid(props) {
 }
 
 
+const isBottom = (el) => {
+    return el.getBoundingClientRect().bottom <= window.innerHeight + 1;
+}
+const trackScrolling = (action) => {
+    const wrappedElement = document.getElementById('root');
+    if (isBottom(wrappedElement)) {
+      action()
+    }
+};
 
 function App() {
   const repos = useStoreState(state => state.repos.items)
   const getRepos = useStoreActions(actions => actions.repos.getRepos)
   useEffect(() => {
     getRepos()
+    const scrollingHandler = () => trackScrolling(getRepos)
+    document.addEventListener('scroll', scrollingHandler);
+    return () => {
+      document.removeEventListener('scroll', scrollingHandler);
+    }
   }, []);
+
 
   return (
     <Container component="main" maxWidth="xl">
