@@ -102,21 +102,21 @@ function App() {
   }, []);
 
   return (
-        <Container component="main" maxWidth="xl">
-          <CssBaseline />
-        <Grid container spacing={1}>
-          {
-            repos.map((l, i) =>(
-            <Grid xs={4} item key={i} >
-              <ComplexGrid {...l}/>
-            </Grid>)
-            )
-          }
-        </Grid>
-        <Box mt={8}>
-          <Copyright />
-        </Box>
-        </Container>
+    <Container component="main" maxWidth="xl">
+    <CssBaseline />
+    <Grid container spacing={1}>
+    {
+      repos.map((l, i) =>(
+        <Grid xs={4} item key={i} >
+        <ComplexGrid {...l}/>
+        </Grid>)
+      )
+    }
+    </Grid>
+    <Box mt={8}>
+    <Copyright />
+    </Box>
+    </Container>
   );
 }
 

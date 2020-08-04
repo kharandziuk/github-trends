@@ -15,9 +15,7 @@ const repos = {
     actions.appendRepos(repos)
   }),
   appendRepos: action((state, repos) => {
-    repos.forEach(x => {
-      state.items.push(x)
-    })
+    state.items = state.items.concat(repos)
   }),
 }
 const model = { repos }
