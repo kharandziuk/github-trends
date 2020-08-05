@@ -13,7 +13,6 @@ const initialState = {
 const repos = {
   ...initialState,
   getRepos: thunk(async (actions, { page, language } = {}, { getState }) => {
-    console.log(page, language)
     const state = getState()
     page = page || state.page
     const languageFilter = language || state.languageFilter

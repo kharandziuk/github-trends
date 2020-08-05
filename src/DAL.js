@@ -5,6 +5,7 @@ const dataFuntion = (data) => {
 }
 
 export const getData = ({ page = 1, language }) => {
+  // FIXME: Removing languae filter doesn't work
   let q = 'created:>2020-07-28'
   if (language) {
     q = q + ` language:${language}`
