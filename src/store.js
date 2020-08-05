@@ -2,12 +2,12 @@ import { createStore, createTypedHooks, action, thunk } from 'easy-peasy'
 import storage from 'redux-persist/lib/storage'
 import _ from 'lodash'
 
-import getData from './DAL';
+import getData from './DAL'
 
 const initialState = {
-  items: [ ],
+  items: [],
   page: 1,
-  languages: [ ]
+  languages: [],
 }
 
 const repos = {
@@ -20,14 +20,13 @@ const repos = {
   }),
   appendRepos: action((state, repos) => {
     state.items = state.items.concat(repos)
-    state.languages = _.compact(_.uniq(state.items.map(x => x.language)))
+    state.languages = _.compact(_.uniq(state.items.map((x) => x.language)))
   }),
   incrementPage: action((state) => {
     state.page = state.page + 1
   }),
 }
 const model = { repos }
-
 
 const store = createStore(model)
 
