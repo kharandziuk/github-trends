@@ -4,19 +4,24 @@ const dataFuntion = (data) => {
   return data
 }
 
-const getData = (page = 0) =>
-  axios
+export const getData = ({ page = 1, language }) => {
+  let q = 'created:>2020-07-28'
+  if (language) {
+    q = q + ` language:${language}`
+  }
+  return axios
     .get('https://api.github.com/search/repositories', {
       params: {
         page,
         sort: 'stars',
         order: 'desc',
-        q: 'created:>2020-07-28',
+        q,
       },
     })
-    .then((response) => dataFuntion(response.data.items))
-    .catch(function (error) {
-      return []
-    })
+    .then((response) => response.data.items)
+}
 
-export default getData
+export const getLanguages = () =>
+  axios
+    .get('https://api.github.com/languages')
+    .then((response) => dataFuntion(response.data))

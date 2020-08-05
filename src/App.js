@@ -117,7 +117,7 @@ const ReposGrid = ({ repos }) => {
   )
 }
 
-const LanguageSelect = ({ languages }) => {
+const LanguageSelect = ({ languages, getRepos }) => {
   const classes = useStyles()
   return (
     <Grid item xs={12}>
@@ -126,6 +126,16 @@ const LanguageSelect = ({ languages }) => {
           <Autocomplete
             id="combo-box-demo"
             options={languages}
+            onChange={(event, value) => {
+              let language
+              if (!value) {
+                language = ''
+              } else {
+                language = value.name
+              }
+              getRepos({ language, page: 1 })
+            }}
+            getOptionLabel={(x) => x.name}
             renderInput={(params) => (
               <TextField
                 {...params}
@@ -161,7 +171,7 @@ function App() {
     <Container className={classes.root}>
       <CssBaseline />
       <Grid container spacing={1}>
-        <LanguageSelect {...{ languages }} />
+        <LanguageSelect {...{ languages, getRepos }} />
         <ReposGrid {...{ repos }} />
       </Grid>
       <Box mt={8}>
