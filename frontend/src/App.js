@@ -1,7 +1,7 @@
 import React, { useState, useEffect} from 'react';
 import logo from './logo.svg'; import './App.css';
 import Avatar from '@material-ui/core/Avatar';
-import Button from '@material-ui/core/Button';
+import { Button, ButtonGroup } from '@material-ui/core';
 import CssBaseline from '@material-ui/core/CssBaseline';
 import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
@@ -16,6 +16,7 @@ import ButtonBase from '@material-ui/core/ButtonBase';
 import Paper from '@material-ui/core/Paper';
 import StarIcon from '@material-ui/icons/Star';
 import StarBorderIcon from '@material-ui/icons/StarBorder';
+import { Autocomplete } from '@material-ui/lab'
 
 import { useStoreActions, useStoreState } from 'easy-peasy';
 
@@ -43,7 +44,6 @@ const useStyles = makeStyles((theme) => ({
     paper: {
           padding: theme.spacing(1),
           margin: 'auto',
-          maxWidth: 400,
         },
     image: {
           width: 128,
@@ -55,7 +55,7 @@ function ComplexGrid(props) {
     const classes = useStyles();
 
     return (
-          <div className={classes.root}>
+
             <Paper className={classes.paper}>
               <Grid container spacing={1}>
                 <Grid item>
@@ -88,7 +88,6 @@ function ComplexGrid(props) {
                 </Grid>
               </Grid>
             </Paper>
-          </div>
         );
 }
 
@@ -103,8 +102,38 @@ const trackScrolling = (action) => {
     }
 };
 
+const ReposGrid = ({repos}) => {
+  return <Grid container spacing={1}>
+    {
+      repos.map((l, i) =>(
+        <Grid xs={4} item key={i} >
+        <ComplexGrid {...l}/>
+        </Grid>)
+      )
+    }
+    </Grid>
+}
+
+const LanguageSelect = ({languages}) => {
+  const classes = useStyles()
+  return <Grid item xs={12}>
+      <Paper className={classes.paper}>
+      <form className={classes.root} noValidate autoComplete="off">
+    <Autocomplete
+    id="combo-box-demo"
+    options={languages}
+    renderInput={(params) =>
+        <TextField {...params} elevation={3} id="outlined-basic" label="language" variant="outlined" fullWidth={true}/>
+    }
+  />
+      </form>
+    </Paper>
+  </Grid>
+}
+
 function App() {
   const repos = useStoreState(state => state.repos.items)
+  const languages = useStoreState(state => state.repos.languages)
   const getRepos = useStoreActions(actions => actions.repos.getRepos)
   useEffect(() => {
     getRepos()
@@ -115,22 +144,17 @@ function App() {
     }
   }, []);
 
-
+  const classes = useStyles()
   return (
-    <Container component="main" maxWidth="xl">
-    <CssBaseline />
-    <Grid container spacing={1}>
-    {
-      repos.map((l, i) =>(
-        <Grid xs={4} item key={i} >
-        <ComplexGrid {...l}/>
-        </Grid>)
-      )
-    }
-    </Grid>
-    <Box mt={8}>
-    <Copyright />
-    </Box>
+    <Container className={classes.root}>
+      <CssBaseline/>
+      <Grid container spacing={1}>
+      <LanguageSelect {...{languages}}/>
+      <ReposGrid {...{repos}}/>
+      </Grid>
+      <Box mt={8}>
+      <Copyright />
+      </Box>
     </Container>
   );
 }

@@ -6,7 +6,8 @@ import getData from './DAL';
 
 const initialState = {
   items: [ ],
-  page: 1
+  page: 1,
+  languages: [ ]
 }
 
 const repos = {
@@ -19,6 +20,7 @@ const repos = {
   }),
   appendRepos: action((state, repos) => {
     state.items = state.items.concat(repos)
+    state.languages = _.compact(_.uniq(state.items.map(x => x.language)))
   }),
   incrementPage: action((state) => {
     state.page = state.page + 1
