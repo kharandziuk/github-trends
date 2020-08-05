@@ -1,5 +1,4 @@
-import { createStore, createTypedHooks, action, thunk } from 'easy-peasy'
-import storage from 'redux-persist/lib/storage'
+import { createStore, action, thunk } from 'easy-peasy'
 import _ from 'lodash'
 
 import getData from './DAL'
