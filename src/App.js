@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react'
-import './App.css'
 import Avatar from '@material-ui/core/Avatar'
 import CssBaseline from '@material-ui/core/CssBaseline'
 import TextField from '@material-ui/core/TextField'
@@ -10,10 +9,12 @@ import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/core/styles'
 import ButtonBase from '@material-ui/core/ButtonBase'
+import { Button } from '@material-ui/core'
 import Paper from '@material-ui/core/Paper'
 import StarIcon from '@material-ui/icons/Star'
 import StarBorderIcon from '@material-ui/icons/StarBorder'
 import { Autocomplete } from '@material-ui/lab'
+import GitHubLogin from 'react-github-login'
 
 import { useStoreActions, useStoreState } from 'easy-peasy'
 
@@ -27,6 +28,19 @@ function Copyright() {
       {new Date().getFullYear()}
       {'.'}
     </Typography>
+  )
+}
+
+const onFailure = (response) => console.error(response)
+
+const GithubLogin = ({ onSuccess }) => {
+  return (
+    <GitHubLogin
+      clientId="Iv1.091542392bd81a08"
+      redirectUri=""
+      onSuccess={onSuccess}
+      onFailure={onFailure}
+    />
   )
 }
 
@@ -117,11 +131,11 @@ const ReposGrid = ({ repos }) => {
   )
 }
 
-const LanguageSelect = ({ languages, getRepos }) => {
+const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
   const classes = useStyles()
   return (
-    <Grid item xs={12}>
-      <Paper className={classes.paper}>
+    <>
+      <Grid item xs={8}>
         <form className={classes.root} noValidate autoComplete="off">
           <Autocomplete
             id="combo-box-demo"
@@ -148,8 +162,11 @@ const LanguageSelect = ({ languages, getRepos }) => {
             )}
           />
         </form>
-      </Paper>
-    </Grid>
+      </Grid>
+      <Grid item xs={4}>
+        <GithubLogin onSuccess={obtainToken} />
+      </Grid>
+    </>
   )
 }
 
@@ -157,6 +174,7 @@ function App() {
   const repos = useStoreState((state) => state.repos.items)
   const languages = useStoreState((state) => state.repos.languages)
   const getRepos = useStoreActions((actions) => actions.repos.getRepos)
+  const obtainToken = useStoreActions((actions) => actions.repos.obtainToken)
   useEffect(() => {
     getRepos()
     const scrollingHandler = () => trackScrolling(getRepos)
@@ -171,7 +189,7 @@ function App() {
     <Container className={classes.root}>
       <CssBaseline />
       <Grid container spacing={1}>
-        <LanguageSelect {...{ languages, getRepos }} />
+        <LanguageSelect {...{ languages, getRepos, obtainToken }} />
         <ReposGrid {...{ repos }} />
       </Grid>
       <Box mt={8}>

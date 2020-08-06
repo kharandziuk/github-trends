@@ -18,7 +18,9 @@
     "prettier": "^2.0.5",
     "react": "^16.13.1",
     "react-dom": "^16.13.1",
+    "react-github-login": "^1.0.3",
     "react-scripts": "3.4.1",
+    "react-social-login": "^3.4.9",
     "redux-persist": "^6.0.0"
   },
   "scripts": {

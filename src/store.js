@@ -1,7 +1,7 @@
 import { createStore, action, thunk } from 'easy-peasy'
 import _ from 'lodash'
 
-import { getData, getLanguages } from './DAL'
+import { getData, getLanguages, getToken } from './DAL'
 
 const initialState = {
   items: [],
@@ -27,6 +27,9 @@ const repos = {
       languageFilter,
     })
     actions.appendRepos(repos)
+  }),
+  obtainToken: thunk(async (actions, { code }) => {
+    console.log(await getToken(code))
   }),
   getLanguages: thunk(async (actions, payload) => {
     const languages = await getLanguages()
