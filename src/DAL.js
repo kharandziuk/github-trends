@@ -33,9 +33,9 @@ export const getToken = (code) =>
       'https://cors-anywhere.herokuapp.com/https://github.com/login/oauth/access_token',
       {
         code,
-        client_id: 'Iv1.091542392bd81a08',
-        client_secret: '150410448c78a07495755025fe409c4b95c2930b',
-        redirect_uri: 'http://localhost:3000',
+        client_id: process.env.REACT_APP_GITHUB_CLIENT_ID,
+        client_secret: process.env.REACT_APP_GITHUB_CLIENT_SECRET,
+        redirect_uri: process.env.REACT_APP_REDIRECT_URL,
       },
     )
     .then((response) => dataFuntion(response.data))

@@ -8,13 +8,12 @@ import Box from '@material-ui/core/Box'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/core/styles'
-import ButtonBase from '@material-ui/core/ButtonBase'
-import { Button } from '@material-ui/core'
+import { Button, ButtonBase, Fab } from '@material-ui/core'
 import Paper from '@material-ui/core/Paper'
 import StarIcon from '@material-ui/icons/Star'
 import StarBorderIcon from '@material-ui/icons/StarBorder'
 import { Autocomplete } from '@material-ui/lab'
-import GitHubLogin from 'react-github-login'
+import GithubLogin from './components/GithubLogin'
 
 import { useStoreActions, useStoreState } from 'easy-peasy'
 
@@ -33,17 +32,6 @@ function Copyright() {
 
 const onFailure = (response) => console.error(response)
 
-const GithubLogin = ({ onSuccess }) => {
-  return (
-    <GitHubLogin
-      clientId="Iv1.091542392bd81a08"
-      redirectUri=""
-      onSuccess={onSuccess}
-      onFailure={onFailure}
-    />
-  )
-}
-
 const useStyles = makeStyles((theme) => ({
   wrapIcon: {
     verticalAlign: 'middle',
@@ -59,6 +47,12 @@ const useStyles = makeStyles((theme) => ({
   image: {
     width: 128,
     height: 128,
+  },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1),
   },
 }))
 
@@ -164,7 +158,11 @@ const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
         </form>
       </Grid>
       <Grid item xs={4}>
-        <GithubLogin onSuccess={obtainToken} />
+        <GithubLogin
+          clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
+          redirectUri=""
+          onSuccess={obtainToken}
+        />
       </Grid>
     </>
   )
