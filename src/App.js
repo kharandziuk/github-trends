@@ -125,8 +125,20 @@ const ReposGrid = ({ repos }) => {
   )
 }
 
-const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
+const UserProfile = ({ user }) => {
+  return (
+    <>
+      <Button>
+        <Avatar alt={user.login} src={user.avatar_url} />
+        logout
+      </Button>
+    </>
+  )
+}
+
+const LanguageSelect = ({ languages, getRepos, obtainToken, user }) => {
   const classes = useStyles()
+  console.log(user)
   return (
     <>
       <Grid item xs={8}>
@@ -158,11 +170,15 @@ const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
         </form>
       </Grid>
       <Grid item xs={4}>
-        <GithubLogin
-          clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
-          redirectUri=""
-          onSuccess={obtainToken}
-        />
+        {user ? (
+          <UserProfile user={user} />
+        ) : (
+          <GithubLogin
+            clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
+            redirectUri=""
+            onSuccess={obtainToken}
+          />
+        )}
       </Grid>
     </>
   )
@@ -171,6 +187,7 @@ const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
 function App() {
   const repos = useStoreState((state) => state.repos.items)
   const languages = useStoreState((state) => state.repos.languages)
+  const user = useStoreState((state) => state.repos.user)
   const getRepos = useStoreActions((actions) => actions.repos.getRepos)
   const obtainToken = useStoreActions((actions) => actions.repos.obtainToken)
   useEffect(() => {
@@ -187,7 +204,7 @@ function App() {
     <Container className={classes.root}>
       <CssBaseline />
       <Grid container spacing={1}>
-        <LanguageSelect {...{ languages, getRepos, obtainToken }} />
+        <LanguageSelect {...{ languages, getRepos, obtainToken, user }} />
         <ReposGrid {...{ repos }} />
       </Grid>
       <Box mt={8}>

@@ -38,4 +38,15 @@ export const getToken = (code) =>
         redirect_uri: process.env.REACT_APP_REDIRECT_URL,
       },
     )
+    .then((response) => {
+      return Object.fromEntries(new URLSearchParams(response.data))
+    })
+
+export const getProfile = (token) =>
+  axios
+    .get('https://api.github.com/user', {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    })
     .then((response) => dataFuntion(response.data))
