@@ -8,13 +8,12 @@ import Box from '@material-ui/core/Box'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/core/styles'
-import ButtonBase from '@material-ui/core/ButtonBase'
-import { Button } from '@material-ui/core'
+import { Button, ButtonBase, Fab } from '@material-ui/core'
 import Paper from '@material-ui/core/Paper'
 import StarIcon from '@material-ui/icons/Star'
 import StarBorderIcon from '@material-ui/icons/StarBorder'
 import { Autocomplete } from '@material-ui/lab'
-import GitHubLogin from 'react-github-login'
+import GithubLogin from './components/GithubLogin'
 
 import { useStoreActions, useStoreState } from 'easy-peasy'
 
@@ -33,17 +32,6 @@ function Copyright() {
 
 const onFailure = (response) => console.error(response)
 
-const GithubLogin = ({ onSuccess }) => {
-  return (
-    <GitHubLogin
-      clientId="Iv1.091542392bd81a08"
-      redirectUri=""
-      onSuccess={onSuccess}
-      onFailure={onFailure}
-    />
-  )
-}
-
 const useStyles = makeStyles((theme) => ({
   wrapIcon: {
     verticalAlign: 'middle',
@@ -60,11 +48,18 @@ const useStyles = makeStyles((theme) => ({
     width: 128,
     height: 128,
   },
+  margin: {
+    margin: theme.spacing(1),
+  },
+  extendedIcon: {
+    marginRight: theme.spacing(1),
+  },
 }))
 
+// FIXME: rename
 function ComplexGrid(props) {
   const classes = useStyles()
-
+  console.log(props)
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={1}>
@@ -80,10 +75,19 @@ function ComplexGrid(props) {
         <Grid item xs={12} sm container>
           <Grid item xs container direction="column" spacing={2}>
             <Grid item xs>
-              <Typography gutterBottom variant="subtitle1">
+              <Typography
+                textOverflow="ellipsis"
+                gutterBottom
+                variant="subtitle1"
+                style={{ height: '1.5em', overflow: 'hidden' }}
+              >
                 {props.name}
               </Typography>
-              <Typography variant="body1" gutterBottom>
+              <Typography
+                variant="body1"
+                gutterBottom
+                style={{ height: '120px' }}
+              >
                 {props.description}
               </Typography>
             </Grid>
@@ -95,6 +99,7 @@ function ComplexGrid(props) {
               >
                 {props.stargazers_count}
                 <StarIcon fontSize="small" />
+                <Link href={props.url}>Repo</Link>
               </Typography>
             </Grid>
           </Grid>
@@ -131,8 +136,20 @@ const ReposGrid = ({ repos }) => {
   )
 }
 
-const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
+const UserLogout = ({ user }) => {
+  return (
+    <>
+      <Button color="secondary" variant="contained">
+        <Avatar alt={user.login} src={user.avatar_url} />
+        logout
+      </Button>
+    </>
+  )
+}
+
+const LanguageSelect = ({ languages, getRepos, obtainToken, user }) => {
   const classes = useStyles()
+  console.log(user)
   return (
     <>
       <Grid item xs={8}>
@@ -163,8 +180,16 @@ const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
           />
         </form>
       </Grid>
-      <Grid item xs={4}>
-        <GithubLogin onSuccess={obtainToken} />
+      <Grid item xs={4} align="right">
+        {user ? (
+          <UserLogout user={user} />
+        ) : (
+          <GithubLogin
+            clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
+            redirectUri=""
+            onSuccess={obtainToken}
+          />
+        )}
       </Grid>
     </>
   )
@@ -173,6 +198,7 @@ const LanguageSelect = ({ languages, getRepos, obtainToken }) => {
 function App() {
   const repos = useStoreState((state) => state.repos.items)
   const languages = useStoreState((state) => state.repos.languages)
+  const user = useStoreState((state) => state.repos.user)
   const getRepos = useStoreActions((actions) => actions.repos.getRepos)
   const obtainToken = useStoreActions((actions) => actions.repos.obtainToken)
   useEffect(() => {
@@ -189,7 +215,7 @@ function App() {
     <Container className={classes.root}>
       <CssBaseline />
       <Grid container spacing={1}>
-        <LanguageSelect {...{ languages, getRepos, obtainToken }} />
+        <LanguageSelect {...{ languages, getRepos, obtainToken, user }} />
         <ReposGrid {...{ repos }} />
       </Grid>
       <Box mt={8}>
