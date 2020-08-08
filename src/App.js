@@ -78,7 +78,7 @@ function ComplexGrid(props) {
                 variant="subtitle1"
                 style={{ height: '1.5em', overflow: 'hidden' }}
               >
-                {props.name}
+                <Link href={props.url}>{props.name}</Link>
               </Typography>
               <Typography
                 variant="body1"
@@ -96,7 +96,6 @@ function ComplexGrid(props) {
               >
                 {props.stargazers_count}
                 <StarIcon fontSize="small" />
-                <Link href={props.url}>Repo</Link>
               </Typography>
             </Grid>
           </Grid>
