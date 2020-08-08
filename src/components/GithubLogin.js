@@ -2,9 +2,10 @@ import GitHubLogin from 'react-github-login'
 
 import React from 'react'
 import { withStyles } from '@material-ui/core/styles'
-import { Fab } from '@material-ui/core'
+import { Fab, Typography } from '@material-ui/core'
 import GitHubIcon from '@material-ui/icons/GitHub'
 
+// FIXME: encapsulate it
 const styles = (theme) => ({
   wrapIcon: {
     verticalAlign: 'middle',
@@ -34,15 +35,14 @@ class StyledGitHubLogin extends GitHubLogin {
     const { classes } = this.props
 
     return (
-      <Fab
-        onClick={this.onBtnClick}
-        color="primary"
-        variant="extended"
-        className={classes.margin}
-      >
-        <GitHubIcon className={classes.extendedIcon} />
-        Login
-      </Fab>
+      <>
+        <Fab onClick={this.onBtnClick} color="primary" variant="extended">
+          <Typography className={classes.wrapIcon}>
+            <GitHubIcon className={classes.extendedIcon} />
+          </Typography>
+          Login
+        </Fab>
+      </>
     )
   }
 }

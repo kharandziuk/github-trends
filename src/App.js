@@ -56,9 +56,10 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+// FIXME: rename
 function ComplexGrid(props) {
   const classes = useStyles()
-
+  console.log(props)
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={1}>
@@ -74,10 +75,19 @@ function ComplexGrid(props) {
         <Grid item xs={12} sm container>
           <Grid item xs container direction="column" spacing={2}>
             <Grid item xs>
-              <Typography gutterBottom variant="subtitle1">
+              <Typography
+                textOverflow="ellipsis"
+                gutterBottom
+                variant="subtitle1"
+                style={{ height: '1.5em', overflow: 'hidden' }}
+              >
                 {props.name}
               </Typography>
-              <Typography variant="body1" gutterBottom>
+              <Typography
+                variant="body1"
+                gutterBottom
+                style={{ height: '120px' }}
+              >
                 {props.description}
               </Typography>
             </Grid>
@@ -89,6 +99,7 @@ function ComplexGrid(props) {
               >
                 {props.stargazers_count}
                 <StarIcon fontSize="small" />
+                <Link href={props.url}>Repo</Link>
               </Typography>
             </Grid>
           </Grid>
@@ -125,10 +136,10 @@ const ReposGrid = ({ repos }) => {
   )
 }
 
-const UserProfile = ({ user }) => {
+const UserLogout = ({ user }) => {
   return (
     <>
-      <Button>
+      <Button color="secondary" variant="contained">
         <Avatar alt={user.login} src={user.avatar_url} />
         logout
       </Button>
@@ -169,9 +180,9 @@ const LanguageSelect = ({ languages, getRepos, obtainToken, user }) => {
           />
         </form>
       </Grid>
-      <Grid item xs={4}>
+      <Grid item xs={4} align="right">
         {user ? (
-          <UserProfile user={user} />
+          <UserLogout user={user} />
         ) : (
           <GithubLogin
             clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
