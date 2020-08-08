@@ -147,7 +147,7 @@ const ReposGrid = ({ repos, starRepo }) => {
   return (
     <Grid container spacing={1}>
       {repos.map((l, i) => (
-        <Grid xs={4} item key={i}>
+        <Grid xs={12} md={4} item key={i}>
           <ComplexGrid starRepo={starRepo} {...l} />
         </Grid>
       ))}
