@@ -1,11 +1,12 @@
-const axios = require('axios')
+import axios from 'axios'
+import _ from 'lodash'
 
+//FIXME: remove, rename
 const dataFuntion = (data) => {
   return data
 }
 
 export const getData = ({ page = 1, language }) => {
-  // FIXME: Removing languae filter doesn't work
   let q = 'created:>2020-07-28'
   if (language) {
     q = q + ` language:${language}`
@@ -19,7 +20,19 @@ export const getData = ({ page = 1, language }) => {
         q,
       },
     })
-    .then((response) => response.data.items)
+    .then((response) =>
+      response.data.items.map((x) =>
+        _.pick(
+          x,
+          'full_name',
+          'html_url',
+          'stargazers_count',
+          'owner',
+          'name',
+          'description',
+        ),
+      ),
+    )
 }
 
 export const getLanguages = () =>
@@ -50,3 +63,44 @@ export const getProfile = (token) =>
       },
     })
     .then((response) => dataFuntion(response.data))
+
+export const starRepo = (repo, token) =>
+  axios
+    .put(
+      `https://api.github.com/user/starred/${repo}`,
+      {},
+      {
+        headers: {
+          Authorization: `token ${token}`,
+        },
+      },
+    )
+    .then((response) => {
+      return response.data
+    })
+
+export const unstarRepo = (repo, token) =>
+  axios
+    .delete(`https://api.github.com/user/starred/${repo}`, {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+    })
+    .then((response) => {
+      return response.data
+    })
+
+export const getStarredRepos = (token, page = 0) =>
+  axios
+    .get(`https://api.github.com/user/starred`, {
+      headers: {
+        Authorization: `token ${token}`,
+      },
+      params: {
+        per_page: 100,
+        page,
+      },
+    })
+    .then((response) => {
+      return response.data.map((x) => x.full_name)
+    })
