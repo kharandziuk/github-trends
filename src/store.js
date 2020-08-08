@@ -1,6 +1,10 @@
 import { createStore, action, thunk } from 'easy-peasy'
+import { persistReducer, persistStore } from 'redux-persist'
+import storage from 'redux-persist/lib/storage'
+import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
 
 import * as service from './DAL'
+import _ from 'lodash'
 
 const initialState = {
   items: [],
@@ -9,7 +13,7 @@ const initialState = {
   languageFilter: null,
   token: null,
   user: null,
-  starredRepos: new Set(),
+  starredRepos: [],
 }
 
 const repos = {
@@ -37,8 +41,9 @@ const repos = {
     }
     service.starRepo(repo, token)
     // HACK: to make the star visible
-    starredRepos.add(repo)
-    actions.updateState({ starredRepos })
+    actions.updateState({
+      starredRepos: _.union(starredRepos, [repo]),
+    })
   }),
   unstarRepo: thunk(async (actions, { repo } = {}, { getState }) => {
     const { token, user, starredRepos } = getState()
@@ -47,8 +52,9 @@ const repos = {
     }
     service.unstarRepo(repo, token)
     // HACK: to make the star visible
-    starredRepos.delete(repo)
-    actions.updateState({ starredRepos })
+    actions.updateState({
+      starredRepos: _.difference(starredRepos, [repo]),
+    })
   }),
   obtainToken: thunk(async (actions, { code }) => {
     const token = (await service.getToken(code)).access_token
@@ -57,7 +63,7 @@ const repos = {
     actions.getStars()
   }),
   getStars: thunk(async (actions, payload, { getState }) => {
-    const { user, token, items } = getState()
+    const { user, token } = getState()
     if (!user) {
       return
     }
@@ -70,9 +76,8 @@ const repos = {
       page = page + 1
       flag = Boolean(starredPage.length)
     }
-    const starredRepos = new Set(allStarred)
     actions.updateState({
-      starredRepos,
+      starredRepos: allStarred,
     })
   }),
   makeLogout: thunk((actions) => {
@@ -84,24 +89,41 @@ const repos = {
   }),
   setLanguages: action((state, languages) => {
     state.languages = languages
+    return state
   }),
   appendRepos: action((state, repos) => {
     state.items = state.items.concat(repos)
+    return state
   }),
   updateState: action((state, newState) => {
-    state = Object.assign(state, newState)
+    state = Object.assign({}, state, newState)
     state.items = state.items.map((x) =>
-      state.starredRepos.has(x.full_name)
+      state.starredRepos.includes(x.full_name)
         ? { ...x, isStarred: true }
         : { ...x, isStarred: false },
     )
+    return state
   }),
 }
 
 const model = { repos }
 
-const store = createStore(model)
+const store = createStore(model, {
+  disableImmer: true,
+  reducerEnhancer: (reducer) =>
+    persistReducer(
+      {
+        key: 'root',
+        storage,
+        stateReconciler: autoMergeLevel2,
+      },
+      reducer,
+    ),
+})
+
+const persistor = persistStore(store)
 
 store.getActions().repos.getLanguages()
+export { persistor }
 
 export default store
