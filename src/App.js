@@ -12,8 +12,11 @@ import { Button, ButtonBase } from '@material-ui/core'
 import Paper from '@material-ui/core/Paper'
 import StarIcon from '@material-ui/icons/Star'
 import StarBorderIcon from '@material-ui/icons/StarBorder'
+import StarHalfIcon from '@material-ui/icons/StarHalf'
 import { Autocomplete } from '@material-ui/lab'
 import GithubLogin from './components/GithubLogin'
+import Dotdotdot from 'react-dotdotdot'
+import _ from 'lodash'
 
 import { useStoreActions, useStoreState } from 'easy-peasy'
 
@@ -21,8 +24,11 @@ function Copyright() {
   return (
     <Typography variant="body2" color="textSecondary" align="center">
       {'Copyright © '}
-      <Link color="inherit" href="https://material-ui.com/">
-        Your Website
+      <Link
+        color="inherit"
+        href="https://github.com/kharandziuk?tab=repositories"
+      >
+        Kharandziuk
       </Link>{' '}
       {new Date().getFullYear()}
       {'.'}
@@ -54,6 +60,29 @@ const useStyles = makeStyles((theme) => ({
   },
 }))
 
+const StarButton = (props) => {
+  const unstarRepo = useStoreActions((actions) => actions.repos.unstarRepo)
+  if (_.isUndefined(props.isStarred)) {
+    return (
+      <ButtonBase>
+        <StarHalfIcon fontSize="large" />
+      </ButtonBase>
+    )
+  } else if (props.isStarred) {
+    return (
+      <ButtonBase onClick={() => unstarRepo({ repo: props.full_name })}>
+        <StarIcon fontSize="large" />
+      </ButtonBase>
+    )
+  } else if (!props.isStarred) {
+    return (
+      <ButtonBase onClick={() => props.starRepo({ repo: props.full_name })}>
+        <StarBorderIcon fontSize="large" />
+      </ButtonBase>
+    )
+  }
+}
+
 // FIXME: rename
 function ComplexGrid(props) {
   const classes = useStyles()
@@ -71,7 +100,7 @@ function ComplexGrid(props) {
         </Grid>
         <Grid item xs={12} sm container>
           <Grid item xs container direction="column" spacing={2}>
-            <Grid item xs>
+            <Grid item xs style={{ height: '6em' }}>
               <Typography
                 textoverflow="ellipsis"
                 gutterBottom
@@ -80,13 +109,9 @@ function ComplexGrid(props) {
               >
                 <Link href={props.html_url}>{props.name}</Link>
               </Typography>
-              <Typography
-                variant="body1"
-                gutterBottom
-                style={{ height: '120px' }}
-              >
-                {props.description}
-              </Typography>
+              <Dotdotdot clamp={4}>
+                <Typography variant="body1">{props.description}</Typography>
+              </Dotdotdot>
             </Grid>
             <Grid item>
               <Typography
@@ -100,9 +125,7 @@ function ComplexGrid(props) {
             </Grid>
           </Grid>
           <Grid item>
-            <ButtonBase>
-              <StarBorderIcon fontSize="large" />
-            </ButtonBase>
+            <StarButton {...props} />
           </Grid>
         </Grid>
       </Grid>
@@ -120,12 +143,12 @@ const trackScrolling = (action) => {
   }
 }
 
-const ReposGrid = ({ repos }) => {
+const ReposGrid = ({ repos, starRepo }) => {
   return (
     <Grid container spacing={1}>
       {repos.map((l, i) => (
         <Grid xs={4} item key={i}>
-          <ComplexGrid {...l} />
+          <ComplexGrid starRepo={starRepo} {...l} />
         </Grid>
       ))}
     </Grid>
@@ -189,6 +212,7 @@ const LanguageSelect = ({
             clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
             redirectUri=""
             onSuccess={obtainToken}
+            scope="public_repo"
           />
         )}
       </Grid>
@@ -201,6 +225,7 @@ function App() {
   const languages = useStoreState((state) => state.repos.languages)
   const user = useStoreState((state) => state.repos.user)
   const getRepos = useStoreActions((actions) => actions.repos.getRepos)
+  const starRepo = useStoreActions((actions) => actions.repos.starRepo)
   const makeLogout = useStoreActions((actions) => actions.repos.makeLogout)
   const obtainToken = useStoreActions((actions) => actions.repos.obtainToken)
   useEffect(() => {
@@ -220,7 +245,7 @@ function App() {
         <LanguageSelect
           {...{ languages, getRepos, obtainToken, user, makeLogout }}
         />
-        <ReposGrid {...{ repos }} />
+        <ReposGrid {...{ repos, starRepo }} />
       </Grid>
       <Box mt={8}>
         <Copyright />
