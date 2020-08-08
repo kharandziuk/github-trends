@@ -8,7 +8,7 @@ import Box from '@material-ui/core/Box'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
 import { makeStyles } from '@material-ui/core/styles'
-import { Button, ButtonBase, Fab } from '@material-ui/core'
+import { Button, ButtonBase } from '@material-ui/core'
 import Paper from '@material-ui/core/Paper'
 import StarIcon from '@material-ui/icons/Star'
 import StarBorderIcon from '@material-ui/icons/StarBorder'
@@ -29,8 +29,6 @@ function Copyright() {
     </Typography>
   )
 }
-
-const onFailure = (response) => console.error(response)
 
 const useStyles = makeStyles((theme) => ({
   wrapIcon: {
@@ -59,7 +57,6 @@ const useStyles = makeStyles((theme) => ({
 // FIXME: rename
 function ComplexGrid(props) {
   const classes = useStyles()
-  console.log(props)
   return (
     <Paper className={classes.paper}>
       <Grid container spacing={1}>
@@ -76,7 +73,7 @@ function ComplexGrid(props) {
           <Grid item xs container direction="column" spacing={2}>
             <Grid item xs>
               <Typography
-                textOverflow="ellipsis"
+                textoverflow="ellipsis"
                 gutterBottom
                 variant="subtitle1"
                 style={{ height: '1.5em', overflow: 'hidden' }}
@@ -136,10 +133,10 @@ const ReposGrid = ({ repos }) => {
   )
 }
 
-const UserLogout = ({ user }) => {
+const UserLogout = ({ user, makeLogout }) => {
   return (
     <>
-      <Button color="secondary" variant="contained">
+      <Button color="secondary" variant="contained" onClick={makeLogout}>
         <Avatar alt={user.login} src={user.avatar_url} />
         logout
       </Button>
@@ -147,9 +144,14 @@ const UserLogout = ({ user }) => {
   )
 }
 
-const LanguageSelect = ({ languages, getRepos, obtainToken, user }) => {
+const LanguageSelect = ({
+  languages,
+  getRepos,
+  obtainToken,
+  user,
+  makeLogout,
+}) => {
   const classes = useStyles()
-  console.log(user)
   return (
     <>
       <Grid item xs={8}>
@@ -182,7 +184,7 @@ const LanguageSelect = ({ languages, getRepos, obtainToken, user }) => {
       </Grid>
       <Grid item xs={4} align="right">
         {user ? (
-          <UserLogout user={user} />
+          <UserLogout {...{ makeLogout, user }} />
         ) : (
           <GithubLogin
             clientId={process.env.REACT_APP_GITHUB_CLIENT_ID}
@@ -200,6 +202,7 @@ function App() {
   const languages = useStoreState((state) => state.repos.languages)
   const user = useStoreState((state) => state.repos.user)
   const getRepos = useStoreActions((actions) => actions.repos.getRepos)
+  const makeLogout = useStoreActions((actions) => actions.repos.makeLogout)
   const obtainToken = useStoreActions((actions) => actions.repos.obtainToken)
   useEffect(() => {
     getRepos()
@@ -215,7 +218,9 @@ function App() {
     <Container className={classes.root}>
       <CssBaseline />
       <Grid container spacing={1}>
-        <LanguageSelect {...{ languages, getRepos, obtainToken, user }} />
+        <LanguageSelect
+          {...{ languages, getRepos, obtainToken, user, makeLogout }}
+        />
         <ReposGrid {...{ repos }} />
       </Grid>
       <Box mt={8}>
