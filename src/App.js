@@ -78,7 +78,7 @@ function ComplexGrid(props) {
                 variant="subtitle1"
                 style={{ height: '1.5em', overflow: 'hidden' }}
               >
-                <Link href={props.url}>{props.name}</Link>
+                <Link href={props.html_url}>{props.name}</Link>
               </Typography>
               <Typography
                 variant="body1"
