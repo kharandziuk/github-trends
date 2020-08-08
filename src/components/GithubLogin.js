@@ -30,6 +30,7 @@ const styles = (theme) => ({
   },
 })
 
+// On Failure case isn't handled
 class StyledGitHubLogin extends GitHubLogin {
   render() {
     const { classes } = this.props

@@ -1,5 +1,4 @@
 import { createStore, action, thunk } from 'easy-peasy'
-import _ from 'lodash'
 
 import { getProfile, getData, getLanguages, getToken } from './DAL'
 
@@ -35,6 +34,9 @@ const repos = {
     const user = await getProfile(token.access_token)
     actions.updateState({ user })
   }),
+  makeLogout: thunk((actions) => {
+    actions.updateState({ user: null, token: null })
+  }),
   getLanguages: thunk(async (actions, payload) => {
     const languages = await getLanguages()
     actions.setLanguages(languages)
@@ -49,6 +51,7 @@ const repos = {
     state = Object.assign(state, newState)
   }),
 }
+
 const model = { repos }
 
 const store = createStore(model)
