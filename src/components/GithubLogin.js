@@ -11,26 +11,12 @@ const styles = (theme) => ({
     verticalAlign: 'middle',
     display: 'inline-flex',
   },
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(1),
-    margin: 'auto',
-  },
-  image: {
-    width: 128,
-    height: 128,
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
   extendedIcon: {
     marginRight: theme.spacing(1),
   },
 })
 
-// On Failure case isn't handled
+//FIXME: On Failure case isn't handled
 class StyledGitHubLogin extends GitHubLogin {
   render() {
     const { classes } = this.props

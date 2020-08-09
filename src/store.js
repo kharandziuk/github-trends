@@ -19,7 +19,7 @@ const initialState = {
 const repos = {
   ...initialState,
   displayRepos: computed(
-    [(state) => state.items, (state) => state.starredRepos],
+    [(state) => state.items, (state, storeState) => storeState.user.stars],
     (items, starredRepos) => {
       return items.map((x) =>
         starredRepos.includes(x.full_name)
@@ -43,49 +43,6 @@ const repos = {
     })
     actions.appendRepos(repos)
   }),
-  starRepo: thunk(async (actions, { repo } = {}, { getState }) => {
-    const { token, user, starredRepos } = getState()
-    if (!user) {
-      return
-    }
-    service.starRepo(repo, token)
-    // HACK: to make the star visible
-    actions.updateState({
-      starredRepos: _.union(starredRepos, [repo]),
-    })
-  }),
-  unstarRepo: thunk(async (actions, { repo } = {}, { getState }) => {
-    const { token, user, starredRepos } = getState()
-    if (!user) {
-      return
-    }
-    service.unstarRepo(repo, token)
-    // HACK: to make the star visible
-    actions.updateState({
-      starredRepos: _.difference(starredRepos, [repo]),
-    })
-  }),
-  getStars: thunk(async (actions, payload, { getState }) => {
-    const { user, token } = getState()
-    if (!user) {
-      return
-    }
-    let flag = true
-    let page = 1
-    let allStarred = []
-    while (flag) {
-      const starredPage = await service.getStarredRepos(token, page)
-      allStarred = allStarred.concat(starredPage)
-      page = page + 1
-      flag = Boolean(starredPage.length)
-    }
-    actions.updateState({
-      starredRepos: allStarred,
-    })
-  }),
-  makeLogout: thunk((actions) => {
-    actions.updateState({ user: null, token: null })
-  }),
   getLanguages: thunk(async (actions, payload) => {
     const languages = await service.getLanguages()
     actions.setLanguages(languages)
@@ -100,11 +57,6 @@ const repos = {
   }),
   updateState: action((state, newState) => {
     state = Object.assign({}, state, newState)
-    state.items = state.items.map((x) =>
-      state.starredRepos.includes(x.full_name)
-        ? { ...x, isStarred: true }
-        : { ...x, isStarred: false },
-    )
     return state
   }),
 }
@@ -113,29 +65,52 @@ const user = {
   token: null,
   user: null,
   stars: [],
+  isLogged: computed([(state) => state.user], (user) => !_.isNull(user)),
   login: thunk(async (actions, { code }) => {
     const token = (await service.getToken(code)).access_token
     const user = await service.getProfile(token)
     actions.updateState({ user, token })
-    actions.getStars()
+    actions.fetchStars()
   }),
-  getStars: thunk(async (actions, payload, { getState }) => {
+  makeLogout: thunk((actions) => {
+    actions.updateState({ user: null, token: null, stars: [] })
+  }),
+  fetchStars: thunk(async (actions, payload, { getState }) => {
     const { user, token } = getState()
-    if (!user) {
-      return
-    }
-    let flag = true
     let page = 1
-    let allStarred = []
-    while (flag) {
-      const starredPage = await service.getStarredRepos(token, page)
-      allStarred = allStarred.concat(starredPage)
+    let stars = []
+    // gets all the pages
+    while (true) {
+      const starsPage = await service.getStarredRepos(token, page)
+      stars = stars.concat(starsPage)
       page = page + 1
-      flag = Boolean(starredPage.length)
+      // if page empty: break the loop
+      if (!Boolean(starsPage.length)) {
+        break
+      }
     }
+    console.log(stars)
     actions.updateState({
-      starredRepos: allStarred,
+      stars,
     })
+  }),
+  starRepo: thunk(async (actions, { repo } = {}, { getState }) => {
+    const { token, stars } = getState()
+    service.starRepo(repo, token)
+    actions.updateState({
+      stars: _.union(stars, [repo]),
+    })
+  }),
+  unstarRepo: thunk(async (actions, { repo } = {}, { getState }) => {
+    const { token, stars } = getState()
+    service.unstarRepo(repo, token)
+    actions.updateState({
+      stars: _.difference(stars, [repo]),
+    })
+  }),
+  updateState: action((state, newState) => {
+    state = Object.assign({}, state, newState)
+    return state
   }),
 }
 
