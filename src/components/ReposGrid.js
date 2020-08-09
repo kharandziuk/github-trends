@@ -92,14 +92,14 @@ const RepoCard = (props) => {
         <CardMedia
           component="img"
           alt={props.owner.login}
-          height="140"
+          height="150"
           image={props.owner.avatar_url}
           title={props.owner.login}
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
-            {props.owner.login} {props.stargazers_count}
-            <StarIcon fontSize="small" />
+            {props.owner.login} <StarIcon fontSize="small" />
+            {props.stargazers_count}
           </Typography>
           <Typography variant="body2" color="textSecondary" component="p">
             {props.description}

@@ -28,7 +28,7 @@ const repos = {
       )
     },
   ),
-  getRepos: thunk(async (actions, { page, language } = {}, { getState }) => {
+  fetch: thunk(async (actions, { page, language } = {}, { getState }) => {
     const state = getState()
     page = page || state.page
     if (page === 1) {
@@ -42,7 +42,6 @@ const repos = {
       languageFilter: language,
     })
     actions.appendRepos(repos)
-    actions.getStars(repos)
   }),
   starRepo: thunk(async (actions, { repo } = {}, { getState }) => {
     const { token, user, starredRepos } = getState()

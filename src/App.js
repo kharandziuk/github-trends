@@ -111,7 +111,7 @@ function App() {
   const repos = useStoreState((state) => state.repos.items)
   const languages = useStoreState((state) => state.repos.languages)
   const user = useStoreState((state) => state.repos.user)
-  const getRepos = useStoreActions((actions) => actions.repos.getRepos)
+  const getRepos = useStoreActions((actions) => actions.repos.fetch)
   const starRepo = useStoreActions((actions) => actions.repos.starRepo)
   const makeLogout = useStoreActions((actions) => actions.repos.makeLogout)
   const obtainToken = useStoreActions((actions) => actions.repos.obtainToken)
