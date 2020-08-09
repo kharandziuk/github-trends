@@ -1,6 +1,6 @@
 import { createStore, action, thunk, computed, persist } from 'easy-peasy'
 
-import * as service from './DAL'
+import * as service from './service'
 import _ from 'lodash'
 
 const repos = {
