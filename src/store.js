@@ -1,7 +1,4 @@
-import { createStore, action, thunk, computed } from 'easy-peasy'
-import { persistReducer, persistStore } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
-import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
+import { createStore, action, thunk, computed, persist } from 'easy-peasy'
 
 import * as service from './DAL'
 import _ from 'lodash'
@@ -76,7 +73,7 @@ const user = {
     actions.updateState({ user: null, token: null, stars: [] })
   }),
   fetchStars: thunk(async (actions, payload, { getState }) => {
-    const { user, token } = getState()
+    const { token } = getState()
     let page = 1
     let stars = []
     // gets all the pages
@@ -89,7 +86,6 @@ const user = {
         break
       }
     }
-    console.log(stars)
     actions.updateState({
       stars,
     })
@@ -114,24 +110,12 @@ const user = {
   }),
 }
 
-const model = { repos, user }
+const model = { repos, user: persist(user) }
 
 const store = createStore(model, {
   disableImmer: true,
-  reducerEnhancer: (reducer) =>
-    persistReducer(
-      {
-        key: 'root',
-        storage,
-        stateReconciler: autoMergeLevel2,
-      },
-      reducer,
-    ),
 })
 
-const persistor = persistStore(store)
-
 store.getActions().repos.getLanguages()
-export { persistor }
 
 export default store
