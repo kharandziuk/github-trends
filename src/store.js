@@ -1,6 +1,6 @@
 import { createStore, action, thunk, computed, persist } from 'easy-peasy'
 
-import * as service from './DAL'
+import * as service from './service'
 import _ from 'lodash'
 
 const repos = {
@@ -18,7 +18,7 @@ const repos = {
       )
     },
   ),
-  fetch: thunk(async (actions, { page, language } = {}, { getState }) => {
+  fetch: thunk(async (actions, { page } = {}, { getState }) => {
     const state = getState()
     page = page || state.page
     if (page === 1) {
@@ -26,10 +26,12 @@ const repos = {
         items: [],
       })
     }
-    const repos = await service.getRepos({ page, language })
+    const repos = await service.getRepos({
+      page,
+      language: state.languageFilter,
+    })
     actions.updateState({
       page: page + 1,
-      languageFilter: language,
     })
     actions.appendRepos(repos)
   }),
@@ -39,9 +41,11 @@ const repos = {
       languages,
     })
   }),
-  setLanguages: action((state, languages) => {
-    state.languages = languages
-    return state
+  setLanguageFilter: thunk(async (actions, { language }) => {
+    actions.updateState({
+      languageFilter: language,
+    })
+    actions.fetch({ page: 1 })
   }),
   appendRepos: action((state, repos) => {
     state.items = state.items.concat(repos)

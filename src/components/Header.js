@@ -23,7 +23,9 @@ const UserLogout = () => {
 const Header = () => {
   const classes = useStyles()
   const languages = useStoreState((state) => state.repos.languages)
-  const getRepos = useStoreActions((actions) => actions.repos.fetch)
+  const setLanguageFilter = useStoreActions(
+    (actions) => actions.repos.setLanguageFilter,
+  )
   const login = useStoreActions((actions) => actions.user.login)
   const isLogged = useStoreState((state) => state.user.isLogged)
   return (
@@ -40,7 +42,7 @@ const Header = () => {
               } else {
                 language = value.name
               }
-              getRepos({ language, page: 1 })
+              setLanguageFilter({ page: 1, language })
             }}
             getOptionLabel={(x) => x.name}
             renderInput={(params) => (
