@@ -1,24 +1,24 @@
-import { createStore, action, thunk } from 'easy-peasy'
-import { persistReducer, persistStore } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
-import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
+import { createStore, action, thunk, computed, persist } from 'easy-peasy'
 
 import * as service from './DAL'
 import _ from 'lodash'
 
-const initialState = {
+const repos = {
   items: [],
   page: 1,
   languages: [],
   languageFilter: null,
-  token: null,
-  user: null,
-  starredRepos: [],
-}
-
-const repos = {
-  ...initialState,
-  getRepos: thunk(async (actions, { page, language } = {}, { getState }) => {
+  displayRepos: computed(
+    [(state) => state.items, (state, storeState) => storeState.user.stars],
+    (items, starredRepos) => {
+      return items.map((x) =>
+        starredRepos.includes(x.full_name)
+          ? { ...x, isStarred: true }
+          : { ...x, isStarred: false },
+      )
+    },
+  ),
+  fetch: thunk(async (actions, { page, language } = {}, { getState }) => {
     const state = getState()
     page = page || state.page
     if (page === 1) {
@@ -26,66 +26,18 @@ const repos = {
         items: [],
       })
     }
-    const repos = await service.getData({ page, language })
+    const repos = await service.getRepos({ page, language })
     actions.updateState({
       page: page + 1,
       languageFilter: language,
     })
     actions.appendRepos(repos)
-    actions.getStars(repos)
-  }),
-  starRepo: thunk(async (actions, { repo } = {}, { getState }) => {
-    const { token, user, starredRepos } = getState()
-    if (!user) {
-      return
-    }
-    service.starRepo(repo, token)
-    // HACK: to make the star visible
-    actions.updateState({
-      starredRepos: _.union(starredRepos, [repo]),
-    })
-  }),
-  unstarRepo: thunk(async (actions, { repo } = {}, { getState }) => {
-    const { token, user, starredRepos } = getState()
-    if (!user) {
-      return
-    }
-    service.unstarRepo(repo, token)
-    // HACK: to make the star visible
-    actions.updateState({
-      starredRepos: _.difference(starredRepos, [repo]),
-    })
-  }),
-  obtainToken: thunk(async (actions, { code }) => {
-    const token = (await service.getToken(code)).access_token
-    const user = await service.getProfile(token)
-    actions.updateState({ user, token })
-    actions.getStars()
-  }),
-  getStars: thunk(async (actions, payload, { getState }) => {
-    const { user, token } = getState()
-    if (!user) {
-      return
-    }
-    let flag = true
-    let page = 1
-    let allStarred = []
-    while (flag) {
-      const starredPage = await service.getStarredRepos(token, page)
-      allStarred = allStarred.concat(starredPage)
-      page = page + 1
-      flag = Boolean(starredPage.length)
-    }
-    actions.updateState({
-      starredRepos: allStarred,
-    })
-  }),
-  makeLogout: thunk((actions) => {
-    actions.updateState({ user: null, token: null })
   }),
   getLanguages: thunk(async (actions, payload) => {
     const languages = await service.getLanguages()
-    actions.setLanguages(languages)
+    actions.updateState({
+      languages,
+    })
   }),
   setLanguages: action((state, languages) => {
     state.languages = languages
@@ -97,33 +49,72 @@ const repos = {
   }),
   updateState: action((state, newState) => {
     state = Object.assign({}, state, newState)
-    state.items = state.items.map((x) =>
-      state.starredRepos.includes(x.full_name)
-        ? { ...x, isStarred: true }
-        : { ...x, isStarred: false },
-    )
     return state
   }),
 }
 
-const model = { repos }
+const user = {
+  token: null,
+  user: null,
+  stars: [],
+  isLogged: computed([(state) => state.user], (user) => !_.isNull(user)),
+  login: thunk(async (actions, { code }) => {
+    const token = (await service.getToken(code)).access_token
+    const user = await service.getProfile(token)
+    actions.updateState({ user, token })
+    actions.fetchStars()
+  }),
+  makeLogout: thunk((actions) => {
+    actions.updateState({ user: null, token: null, stars: [] })
+  }),
+  fetchStars: thunk(async (actions, payload, { getState }) => {
+    const { isLogged } = getState()
+    if (!isLogged) {
+      return
+    }
+    const { token } = getState()
+    let page = 1
+    let stars = []
+    // gets all the pages
+    while (true) {
+      const starsPage = await service.getStarredRepos(token, page)
+      stars = stars.concat(starsPage)
+      page = page + 1
+      // if page empty: break the loop
+      if (!Boolean(starsPage.length)) {
+        break
+      }
+    }
+    actions.updateState({
+      stars,
+    })
+  }),
+  starRepo: thunk(async (actions, { repo } = {}, { getState }) => {
+    const { token, stars } = getState()
+    actions.updateState({
+      stars: _.union(stars, [repo]),
+    })
+    service.starRepo(repo, token)
+  }),
+  unstarRepo: thunk(async (actions, { repo } = {}, { getState }) => {
+    const { token, stars } = getState()
+    actions.updateState({
+      stars: _.difference(stars, [repo]),
+    })
+    service.unstarRepo(repo, token)
+  }),
+  updateState: action((state, newState) => {
+    state = Object.assign({}, state, newState)
+    return state
+  }),
+}
+
+const model = { repos, user: persist(user) }
 
 const store = createStore(model, {
   disableImmer: true,
-  reducerEnhancer: (reducer) =>
-    persistReducer(
-      {
-        key: 'root',
-        storage,
-        stateReconciler: autoMergeLevel2,
-      },
-      reducer,
-    ),
 })
 
-const persistor = persistStore(store)
-
 store.getActions().repos.getLanguages()
-export { persistor }
 
 export default store
