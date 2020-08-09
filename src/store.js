@@ -3,18 +3,11 @@ import { createStore, action, thunk, computed, persist } from 'easy-peasy'
 import * as service from './DAL'
 import _ from 'lodash'
 
-const initialState = {
+const repos = {
   items: [],
   page: 1,
   languages: [],
   languageFilter: null,
-  token: null,
-  user: null,
-  starredRepos: [],
-}
-
-const repos = {
-  ...initialState,
   displayRepos: computed(
     [(state) => state.items, (state, storeState) => storeState.user.stars],
     (items, starredRepos) => {
@@ -42,7 +35,9 @@ const repos = {
   }),
   getLanguages: thunk(async (actions, payload) => {
     const languages = await service.getLanguages()
-    actions.setLanguages(languages)
+    actions.updateState({
+      languages,
+    })
   }),
   setLanguages: action((state, languages) => {
     state.languages = languages
@@ -73,6 +68,10 @@ const user = {
     actions.updateState({ user: null, token: null, stars: [] })
   }),
   fetchStars: thunk(async (actions, payload, { getState }) => {
+    const { isLogged } = getState()
+    if (!isLogged) {
+      return
+    }
     const { token } = getState()
     let page = 1
     let stars = []
@@ -92,17 +91,17 @@ const user = {
   }),
   starRepo: thunk(async (actions, { repo } = {}, { getState }) => {
     const { token, stars } = getState()
-    service.starRepo(repo, token)
     actions.updateState({
       stars: _.union(stars, [repo]),
     })
+    service.starRepo(repo, token)
   }),
   unstarRepo: thunk(async (actions, { repo } = {}, { getState }) => {
     const { token, stars } = getState()
-    service.unstarRepo(repo, token)
     actions.updateState({
       stars: _.difference(stars, [repo]),
     })
+    service.unstarRepo(repo, token)
   }),
   updateState: action((state, newState) => {
     state = Object.assign({}, state, newState)

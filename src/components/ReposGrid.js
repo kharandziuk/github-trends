@@ -18,7 +18,7 @@ import { useStoreState, useStoreActions } from 'easy-peasy'
 
 const StarButton = (props) => {
   const unstarRepo = useStoreActions((actions) => actions.user.unstarRepo)
-  const starRepo = useStoreActions((actions) => actions.user.unstarRepo)
+  const starRepo = useStoreActions((actions) => actions.user.starRepo)
   let content
   if (_.isUndefined(props.isStarred)) {
     return <></>
@@ -50,10 +50,18 @@ const RepoCard = (props) => {
         />
         <CardContent>
           <Typography gutterBottom variant="h5" component="h2">
-            {props.name} <StarIcon fontSize="small" />
+            {props.name}
+          </Typography>
+          <Typography gutterBottom variant="h5" component="h2">
+            <StarIcon fontSize="small" />
             {props.stargazers_count}
           </Typography>
-          <Typography variant="body2" color="textSecondary" component="p">
+          <Typography
+            variant="body2"
+            color="textSecondary"
+            component="p"
+            style={{ height: '6em' }}
+          >
             {props.description}
           </Typography>
         </CardContent>
