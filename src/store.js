@@ -1,4 +1,4 @@
-import { createStore, action, thunk } from 'easy-peasy'
+import { createStore, action, thunk, computed } from 'easy-peasy'
 import { persistReducer, persistStore } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
 import autoMergeLevel2 from 'redux-persist/lib/stateReconciler/autoMergeLevel2'
@@ -18,6 +18,16 @@ const initialState = {
 
 const repos = {
   ...initialState,
+  displayRepos: computed(
+    [(state) => state.items, (state) => state.starredRepos],
+    (items, starredRepos) => {
+      return items.map((x) =>
+        starredRepos.includes(x.full_name)
+          ? { ...x, isStarred: true }
+          : { ...x, isStarred: false },
+      )
+    },
+  ),
   getRepos: thunk(async (actions, { page, language } = {}, { getState }) => {
     const state = getState()
     page = page || state.page
@@ -26,7 +36,7 @@ const repos = {
         items: [],
       })
     }
-    const repos = await service.getData({ page, language })
+    const repos = await service.getRepos({ page, language })
     actions.updateState({
       page: page + 1,
       languageFilter: language,
@@ -55,12 +65,6 @@ const repos = {
     actions.updateState({
       starredRepos: _.difference(starredRepos, [repo]),
     })
-  }),
-  obtainToken: thunk(async (actions, { code }) => {
-    const token = (await service.getToken(code)).access_token
-    const user = await service.getProfile(token)
-    actions.updateState({ user, token })
-    actions.getStars()
   }),
   getStars: thunk(async (actions, payload, { getState }) => {
     const { user, token } = getState()
@@ -106,7 +110,37 @@ const repos = {
   }),
 }
 
-const model = { repos }
+const user = {
+  token: null,
+  user: null,
+  stars: [],
+  login: thunk(async (actions, { code }) => {
+    const token = (await service.getToken(code)).access_token
+    const user = await service.getProfile(token)
+    actions.updateState({ user, token })
+    actions.getStars()
+  }),
+  getStars: thunk(async (actions, payload, { getState }) => {
+    const { user, token } = getState()
+    if (!user) {
+      return
+    }
+    let flag = true
+    let page = 1
+    let allStarred = []
+    while (flag) {
+      const starredPage = await service.getStarredRepos(token, page)
+      allStarred = allStarred.concat(starredPage)
+      page = page + 1
+      flag = Boolean(starredPage.length)
+    }
+    actions.updateState({
+      starredRepos: allStarred,
+    })
+  }),
+}
+
+const model = { repos, user }
 
 const store = createStore(model, {
   disableImmer: true,

@@ -1,13 +1,11 @@
 import axios from 'axios'
 import _ from 'lodash'
+import moment from 'moment'
 
-//FIXME: remove, rename
-const dataFuntion = (data) => {
-  return data
-}
-
-export const getData = ({ page = 1, language }) => {
-  let q = 'created:>2020-07-28'
+export const getRepos = ({ page = 1, language }) => {
+  //FIXME: hardcode for simplicity
+  const date = moment().subtract(7, 'days').format('YYYY-MM-DD')
+  let q = `created:>${date}`
   if (language) {
     q = q + ` language:${language}`
   }
@@ -38,7 +36,7 @@ export const getData = ({ page = 1, language }) => {
 export const getLanguages = () =>
   axios
     .get('https://api.github.com/languages')
-    .then((response) => dataFuntion(response.data))
+    .then((response) => response.data)
 
 export const getToken = (code) =>
   axios
@@ -62,7 +60,7 @@ export const getProfile = (token) =>
         Authorization: `token ${token}`,
       },
     })
-    .then((response) => dataFuntion(response.data))
+    .then((response) => response.data)
 
 export const starRepo = (repo, token) =>
   axios

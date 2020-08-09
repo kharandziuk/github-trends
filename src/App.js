@@ -7,16 +7,11 @@ import Grid from '@material-ui/core/Grid'
 import Box from '@material-ui/core/Box'
 import Typography from '@material-ui/core/Typography'
 import Container from '@material-ui/core/Container'
-import { makeStyles } from '@material-ui/core/styles'
-import { Button, ButtonBase } from '@material-ui/core'
-import Paper from '@material-ui/core/Paper'
-import StarIcon from '@material-ui/icons/Star'
-import StarBorderIcon from '@material-ui/icons/StarBorder'
-import StarHalfIcon from '@material-ui/icons/StarHalf'
+import { Button } from '@material-ui/core'
 import { Autocomplete } from '@material-ui/lab'
 import GithubLogin from './components/GithubLogin'
-import Dotdotdot from 'react-dotdotdot'
-import _ from 'lodash'
+import ReposGrid from './components/ReposGrid'
+import useStyles from './useStyles'
 
 import { useStoreActions, useStoreState } from 'easy-peasy'
 
@@ -36,123 +31,15 @@ function Copyright() {
   )
 }
 
-const useStyles = makeStyles((theme) => ({
-  wrapIcon: {
-    verticalAlign: 'middle',
-    display: 'inline-flex',
-  },
-  root: {
-    flexGrow: 1,
-  },
-  paper: {
-    padding: theme.spacing(1),
-    margin: 'auto',
-  },
-  image: {
-    width: 128,
-    height: 128,
-  },
-  margin: {
-    margin: theme.spacing(1),
-  },
-  extendedIcon: {
-    marginRight: theme.spacing(1),
-  },
-}))
-
-const StarButton = (props) => {
-  const unstarRepo = useStoreActions((actions) => actions.repos.unstarRepo)
-  if (_.isUndefined(props.isStarred)) {
-    return (
-      <ButtonBase>
-        <StarHalfIcon fontSize="large" />
-      </ButtonBase>
-    )
-  } else if (props.isStarred) {
-    return (
-      <ButtonBase onClick={() => unstarRepo({ repo: props.full_name })}>
-        <StarIcon fontSize="large" />
-      </ButtonBase>
-    )
-  } else if (!props.isStarred) {
-    return (
-      <ButtonBase onClick={() => props.starRepo({ repo: props.full_name })}>
-        <StarBorderIcon fontSize="large" />
-      </ButtonBase>
-    )
-  }
-}
-
-// FIXME: rename
-function ComplexGrid(props) {
-  const classes = useStyles()
-  return (
-    <Paper className={classes.paper}>
-      <Grid container spacing={1}>
-        <Grid item>
-          <ButtonBase className={classes.image}>
-            <Avatar
-              alt={props.owner.login}
-              src={props.owner.avatar_url}
-              className={classes.large}
-            />
-          </ButtonBase>
-        </Grid>
-        <Grid item xs={12} sm container>
-          <Grid item xs container direction="column" spacing={2}>
-            <Grid item xs style={{ height: '6em' }}>
-              <Typography
-                textoverflow="ellipsis"
-                gutterBottom
-                variant="subtitle1"
-                style={{ height: '1.5em', overflow: 'hidden' }}
-              >
-                <Link href={props.html_url}>{props.name}</Link>
-              </Typography>
-              <Dotdotdot clamp={4}>
-                <Typography variant="body1">{props.description}</Typography>
-              </Dotdotdot>
-            </Grid>
-            <Grid item>
-              <Typography
-                variant="body2"
-                style={{ cursor: 'pointer' }}
-                className={classes.wrapIcon}
-              >
-                {props.stargazers_count}
-                <StarIcon fontSize="small" />
-              </Typography>
-            </Grid>
-          </Grid>
-          <Grid item>
-            <StarButton {...props} />
-          </Grid>
-        </Grid>
-      </Grid>
-    </Paper>
-  )
-}
-
 const isBottom = (el) => {
   return el.getBoundingClientRect().bottom <= window.innerHeight + 1
 }
+
 const trackScrolling = (action) => {
   const wrappedElement = document.getElementById('root')
   if (isBottom(wrappedElement)) {
     action()
   }
-}
-
-const ReposGrid = ({ repos, starRepo }) => {
-  return (
-    <Grid container spacing={1}>
-      {repos.map((l, i) => (
-        <Grid xs={12} md={4} item key={i}>
-          <ComplexGrid starRepo={starRepo} {...l} />
-        </Grid>
-      ))}
-    </Grid>
-  )
 }
 
 const UserLogout = ({ user, makeLogout }) => {
