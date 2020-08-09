@@ -2,7 +2,6 @@ import React from 'react'
 import ReposGrid from './components/ReposGrid'
 import Copyright from './components/Copyright'
 import Header from './components/Header'
-import { useStoreActions, useStoreState } from 'easy-peasy'
 import { Container, Box, Grid } from '@material-ui/core'
 
 export default () => {
