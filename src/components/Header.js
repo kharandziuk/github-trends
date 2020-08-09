@@ -27,7 +27,7 @@ const Header = () => {
   const login = useStoreActions((actions) => actions.user.login)
   const isLogged = useStoreState((state) => state.user.isLogged)
   return (
-    <Grid container style={{ margin: '8px' }}>
+    <Grid container>
       <Grid item xs={8}>
         <form className={classes.root} noValidate autoComplete="off">
           <Autocomplete

@@ -20,13 +20,19 @@ const StarButton = (props) => {
   const unstarRepo = useStoreActions((actions) => actions.user.unstarRepo)
   const starRepo = useStoreActions((actions) => actions.user.starRepo)
   let content
-  if (_.isUndefined(props.isStarred)) {
-    return <></>
-  } else if (props.isStarred) {
-    content = <StarIcon onClick={() => unstarRepo({ repo: props.full_name })} />
+  if (props.isStarred) {
+    content = (
+      <>
+        <StarIcon onClick={() => unstarRepo({ repo: props.full_name })} />
+        unstar
+      </>
+    )
   } else if (!props.isStarred) {
     content = (
-      <StarBorderIcon onClick={() => starRepo({ repo: props.full_name })} />
+      <>
+        <StarBorderIcon onClick={() => starRepo({ repo: props.full_name })} />
+        star
+      </>
     )
   }
   return (

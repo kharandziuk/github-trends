@@ -5,7 +5,7 @@ import { withStyles } from '@material-ui/core/styles'
 import { Fab, Typography } from '@material-ui/core'
 import GitHubIcon from '@material-ui/icons/GitHub'
 
-// FIXME: encapsulate it
+// HACK: react-github-login doesn't support hooks.
 const styles = (theme) => ({
   wrapIcon: {
     verticalAlign: 'middle',
