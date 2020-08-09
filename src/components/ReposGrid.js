@@ -10,7 +10,6 @@ import {
 } from '@material-ui/core'
 import StarIcon from '@material-ui/icons/Star'
 import StarBorderIcon from '@material-ui/icons/StarBorder'
-import _ from 'lodash'
 import Typography from '@material-ui/core/Typography'
 import Link from '@material-ui/core/Link'
 
